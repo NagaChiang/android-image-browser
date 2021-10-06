@@ -22,7 +22,7 @@ class ImageRecyclerViewAdapter(private val imageDatas: ArrayList<ImageData>) :
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.textView.text = imageDatas[position].id
+        holder.textView.text = imageDatas[position].id.toString()
     }
 
     override fun getItemCount(): Int {

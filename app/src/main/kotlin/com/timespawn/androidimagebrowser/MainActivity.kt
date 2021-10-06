@@ -1,10 +1,10 @@
 package com.timespawn.androidimagebrowser
 
+import android.annotation.SuppressLint
 import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -14,8 +14,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.timespawn.androidimagebrowser.models.ImageData
+import com.timespawn.androidimagebrowser.models.PixabayApi
 import com.timespawn.androidimagebrowser.views.ImageRecyclerViewAdapter
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -56,31 +56,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private suspend fun onSearchQueryReceived(query: String) {
         progressOverlay.visibility = VISIBLE
 
-        imageDatas.clear()
-        imageDatas.addAll(searchImage(query))
-        imageRecyclerView.adapter?.notifyDataSetChanged()
+        val newDatas = PixabayApi.searchImages(query)
+        if (newDatas != null) {
+            imageDatas.clear()
+            imageDatas.addAll(newDatas)
+            imageRecyclerView.adapter?.notifyDataSetChanged()
+        }
 
         progressOverlay.visibility = GONE
-    }
-
-    private suspend fun searchImage(query: String): ArrayList<ImageData> {
-        // TODO
-        Log.d(TAG, "Search images with query '$query'")
-        delay(1000)
-
-        return arrayListOf(
-            ImageData("adfsaf"),
-            ImageData("ddd"),
-            ImageData("fdsf"),
-            ImageData("ewe"),
-            ImageData("gegdsdf"),
-            ImageData("fe3ffdsv"),
-            ImageData("vrbrb"),
-            ImageData("23r32"),
-            ImageData("efeffe"),
-        )
     }
 }
