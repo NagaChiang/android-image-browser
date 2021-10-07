@@ -3,6 +3,7 @@ package com.timespawn.androidimagebrowser.views
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.timespawn.androidimagebrowser.R
@@ -12,7 +13,11 @@ class ImageRecyclerViewAdapter(private val imageDatas: ArrayList<ImageData>) :
     RecyclerView.Adapter<ImageRecyclerViewAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val textView: TextView = view.findViewById(R.id.textView)
+        val previewImage: ImageView = view.findViewById(R.id.previewImage)
+        val viewText: TextView = view.findViewById(R.id.viewText)
+        val likeText: TextView = view.findViewById(R.id.likeText)
+        val downloadText: TextView = view.findViewById(R.id.downloadText)
+        val commentText: TextView = view.findViewById(R.id.commentText)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -22,7 +27,12 @@ class ImageRecyclerViewAdapter(private val imageDatas: ArrayList<ImageData>) :
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.textView.text = imageDatas[position].id.toString()
+        val data = imageDatas[position]
+        // TODO: Show preview image
+        holder.viewText.text = data.viewCount.toString()
+        holder.likeText.text = data.likeCount.toString()
+        holder.downloadText.text = data.downloadCount.toString()
+        holder.commentText.text = data.commentCount.toString()
     }
 
     override fun getItemCount(): Int {
