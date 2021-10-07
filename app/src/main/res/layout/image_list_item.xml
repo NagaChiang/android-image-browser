@@ -8,9 +8,9 @@
     <ImageView
         android:id="@+id/previewImage"
         android:layout_width="100dp"
-        android:layout_height="64dp"
-        android:background="#000000"
+        android:layout_height="100dp"
         android:contentDescription="@string/preview_image_description"
+        android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/tableLayout"
         app:layout_constraintStart_toStartOf="parent"

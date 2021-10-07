@@ -4,7 +4,11 @@ import android.annotation.SuppressLint
 import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -12,6 +16,7 @@ import android.widget.LinearLayout.VERTICAL
 import android.widget.SearchView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,12 +27,20 @@ import com.timespawn.androidimagebrowser.views.ImageRecyclerViewAdapter
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
+    enum class LayoutMode {
+        List,
+        Grid,
+    }
+
     companion object {
-        const val TAG = "MainActivity"
+        private const val TAG = "MainActivity"
+        private const val LAYOUT_MODE_PREF_KEY = "layoutMode"
     }
 
     private lateinit var imageRecyclerView : RecyclerView
     private lateinit var progressOverlay : View
+    private lateinit var defaultLayoutMode: LayoutMode
+    private lateinit var currentLayoutMode: LayoutMode
 
     private var imageDatas = arrayListOf<ImageData>()
 
@@ -35,6 +48,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.toolbar))
+
+        defaultLayoutMode = LayoutMode.List // TODO: Remote default value
+        currentLayoutMode = getLayoutModeFromPreferences()
 
         imageRecyclerView = findViewById<RecyclerView>(R.id.imageRecyclerView).apply {
             adapter = ImageRecyclerViewAdapter(imageDatas)
@@ -74,5 +90,60 @@ class MainActivity : AppCompatActivity() {
         }
 
         progressOverlay.visibility = GONE
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu, menu)
+
+        val layoutSwitchItem = menu?.findItem(R.id.layoutSwitch)
+        layoutSwitchItem?.icon = getLayoutModeIcon(getLayoutModeFromPreferences())
+
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.layoutSwitch -> {
+                currentLayoutMode = if (currentLayoutMode == LayoutMode.List) LayoutMode.Grid else LayoutMode.List
+                setLayoutModeToPreferences(currentLayoutMode)
+                item.icon = getLayoutModeIcon(currentLayoutMode)
+            }
+        }
+
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun getLayoutModeIcon(mode: LayoutMode): Drawable {
+        return when (mode) {
+            LayoutMode.List -> ContextCompat.getDrawable(this, R.drawable.ic_baseline_view_list_24)!!
+            LayoutMode.Grid -> ContextCompat.getDrawable(this, R.drawable.ic_baseline_grid_on_24)!!
+        }
+    }
+
+    private fun getLayoutModeFromPreferences(): LayoutMode {
+        val pref = getPreferences(Context.MODE_PRIVATE)
+        val modeValue = pref.getInt(LAYOUT_MODE_PREF_KEY, defaultLayoutMode.ordinal)
+
+        return intToLayoutMode(modeValue)
+    }
+
+    private fun setLayoutModeToPreferences(mode: LayoutMode) {
+        val pref = getPreferences(Context.MODE_PRIVATE)
+        with (pref.edit()) {
+            putInt(LAYOUT_MODE_PREF_KEY, mode.ordinal)
+            apply()
+        }
+    }
+
+    private fun intToLayoutMode(value: Int): LayoutMode {
+        LayoutMode.values().forEach {
+            if (value == it.ordinal) {
+                return it
+            }
+        }
+
+        Log.w(TAG, "intToLayoutMode(): Failed to convert int to LayoutMode ($value), returns default layout mode instead")
+
+        return defaultLayoutMode
     }
 }
