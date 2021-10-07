@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import com.timespawn.androidimagebrowser.R
 import com.timespawn.androidimagebrowser.models.ImageData
 
@@ -28,7 +29,11 @@ class ImageRecyclerViewAdapter(private val imageDatas: ArrayList<ImageData>) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val data = imageDatas[position]
-        // TODO: Show preview image
+
+        holder.previewImage.load(data.previewUrl) {
+            crossfade(true)
+        }
+
         holder.viewText.text = data.viewCount.toString()
         holder.likeText.text = data.likeCount.toString()
         holder.downloadText.text = data.downloadCount.toString()
