@@ -9,14 +9,14 @@ import kotlinx.serialization.json.*
 
 class PixabayApi {
     companion object {
-        private val TAG = "PixabayApi"
-        private val BASE_PATH = "https://pixabay.com/api/"
+        private const val TAG = "PixabayApi"
+        private const val BASE_PATH = "https://pixabay.com/api/"
         private val ignoreUnknownJson = Json { ignoreUnknownKeys = true }
 
         suspend fun searchImages(query: String): ArrayList<ImageData>? {
-            val (request, response, result) = Fuel.get(BASE_PATH, listOf(
+            val (request, _, result) = Fuel.get(BASE_PATH, listOf(
                 "key" to BuildConfig.PIXABAY_API_KEY,
-                "q" to "flower",
+                "q" to query,
             )).awaitStringResponseResult()
 
             Log.i(TAG, request.toString())
@@ -31,14 +31,14 @@ class PixabayApi {
                     val data = result.get()
                     Log.i(TAG, "Search image result: $data")
 
+                    if (imageDatas == null) {
+                        imageDatas = arrayListOf()
+                    }
+
                     val dataJson = Json.parseToJsonElement(data)
                     dataJson.jsonObject["hits"]?.jsonArray?.forEach {
-                        val data = ignoreUnknownJson.decodeFromJsonElement<ImageData>(it)
-                        if (imageDatas == null) {
-                            imageDatas = arrayListOf()
-                        }
-
-                        imageDatas!!.add(data)
+                        val imageData = ignoreUnknownJson.decodeFromJsonElement<ImageData>(it)
+                        imageDatas.add(imageData)
                     }
                 }
             }
