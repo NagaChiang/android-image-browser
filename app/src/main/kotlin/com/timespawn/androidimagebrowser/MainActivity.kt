@@ -12,7 +12,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
-import android.widget.LinearLayout.HORIZONTAL
 import android.widget.LinearLayout.VERTICAL
 import android.widget.SearchView
 import android.widget.Toast
@@ -25,6 +24,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.timespawn.androidimagebrowser.models.ImageData
 import com.timespawn.androidimagebrowser.models.PixabayApi
+import com.timespawn.androidimagebrowser.models.RemoteConfig
 import com.timespawn.androidimagebrowser.views.ImageRecyclerViewGridAdapter
 import com.timespawn.androidimagebrowser.views.ImageRecyclerViewLinearAdapter
 import kotlinx.coroutines.launch
@@ -45,21 +45,22 @@ class MainActivity : AppCompatActivity() {
     private val linearAdapter = ImageRecyclerViewLinearAdapter(imageDatas)
     private val gridAdapter = ImageRecyclerViewGridAdapter(imageDatas)
 
-    private lateinit var imageRecyclerView : RecyclerView
-    private lateinit var progressOverlay : View
-    private lateinit var defaultLayoutMode: LayoutMode
-    private lateinit var currentLayoutMode: LayoutMode
+    private lateinit var imageRecyclerView: RecyclerView
+    private lateinit var progressOverlay: View
+    private lateinit var layoutSwitchMenuItem: MenuItem
+
+    private var defaultLayoutMode: LayoutMode = LayoutMode.List
+    private var currentLayoutMode: LayoutMode = LayoutMode.List
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.toolbar))
 
-        defaultLayoutMode = LayoutMode.List // TODO: Remote default value
-        currentLayoutMode = getLayoutModeFromPreferences()
-
-        imageRecyclerView = findViewById(R.id.imageRecyclerView)
-        updateImageRecyclerViewLayout(currentLayoutMode)
+        imageRecyclerView = findViewById<RecyclerView>(R.id.imageRecyclerView).apply {
+            adapter = linearAdapter
+            layoutManager = LinearLayoutManager(this@MainActivity)
+        }
 
         progressOverlay = findViewById(R.id.progressOverlay)
 
@@ -69,20 +70,38 @@ class MainActivity : AppCompatActivity() {
             isIconifiedByDefault = false
             isSubmitButtonEnabled = true
         }
+
+        lifecycleScope.launch {
+            setProgressOverlayEnabled(true)
+            initialize()
+            setProgressOverlayEnabled(false)
+        }
+    }
+
+    private suspend fun initialize() {
+        val config = RemoteConfig.fromUrl()
+        if (config != null) {
+            defaultLayoutMode = intToLayoutMode(config.defaultLayoutMode)
+        }
+
+        currentLayoutMode = getLayoutModeFromPreferences()
+        updateImageRecyclerViewLayout(currentLayoutMode)
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
         if (intent?.action == Intent.ACTION_SEARCH) {
-            intent.getStringExtra(SearchManager.QUERY)?.also { query -> lifecycleScope.launch { onSearchQueryReceived(query) } }
+            intent.getStringExtra(SearchManager.QUERY)?.also { query -> lifecycleScope.launch {
+                setProgressOverlayEnabled(true)
+                onSearchQueryReceived(query)
+                setProgressOverlayEnabled(false)
+            }}
         }
     }
 
     @SuppressLint("NotifyDataSetChanged")
     private suspend fun onSearchQueryReceived(query: String) {
-        progressOverlay.visibility = VISIBLE
-
         val newDatas = PixabayApi.searchImages(query)
         if (newDatas != null) {
             imageDatas.clear()
@@ -91,15 +110,13 @@ class MainActivity : AppCompatActivity() {
         } else {
             Toast.makeText(this, "Failed to search images", Toast.LENGTH_LONG).show()
         }
-
-        progressOverlay.visibility = GONE
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu, menu)
 
-        val layoutSwitchItem = menu?.findItem(R.id.layoutSwitch)
-        layoutSwitchItem?.icon = getLayoutModeIcon(getLayoutModeFromPreferences())
+        layoutSwitchMenuItem = menu?.findItem(R.id.layoutSwitch)!!
+        layoutSwitchMenuItem.icon = getLayoutModeIcon(currentLayoutMode)
 
         return super.onCreateOptionsMenu(menu)
     }
@@ -109,7 +126,6 @@ class MainActivity : AppCompatActivity() {
             R.id.layoutSwitch -> {
                 currentLayoutMode = if (currentLayoutMode == LayoutMode.List) LayoutMode.Grid else LayoutMode.List
                 setLayoutModeToPreferences(currentLayoutMode)
-                item.icon = getLayoutModeIcon(currentLayoutMode)
                 updateImageRecyclerViewLayout(currentLayoutMode)
             }
         }
@@ -146,7 +162,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        Log.w(TAG, "intToLayoutMode(): Failed to convert int to LayoutMode ($value), returns default layout mode instead")
+        Log.e(TAG, "intToLayoutMode(): Failed to convert int to LayoutMode ($value), returns default layout mode instead")
 
         return defaultLayoutMode
     }
@@ -164,6 +180,16 @@ class MainActivity : AppCompatActivity() {
                 imageRecyclerView.adapter = gridAdapter
                 imageRecyclerView.layoutManager = GridLayoutManager(this, ITEM_PER_ROW)
             }
+        }
+
+        layoutSwitchMenuItem.icon = getLayoutModeIcon(mode)
+    }
+
+    private fun setProgressOverlayEnabled(enabled: Boolean) {
+        if (enabled) {
+            progressOverlay.visibility = VISIBLE
+        } else {
+            progressOverlay.visibility = GONE
         }
     }
 }

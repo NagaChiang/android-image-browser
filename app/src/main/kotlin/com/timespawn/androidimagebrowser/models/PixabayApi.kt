@@ -5,7 +5,10 @@ import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.result.Result
 import com.timespawn.androidimagebrowser.BuildConfig
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
 
 class PixabayApi {
     companion object {
@@ -29,6 +32,7 @@ class PixabayApi {
 
                 is Result.Success -> {
                     val data = result.get()
+
                     Log.i(TAG, "Search image result: $data")
 
                     if (imageDatas == null) {
