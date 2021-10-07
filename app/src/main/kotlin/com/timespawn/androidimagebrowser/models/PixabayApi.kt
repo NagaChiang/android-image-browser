@@ -19,9 +19,9 @@ class PixabayApi {
                 "q" to "flower",
             )).awaitStringResponseResult()
 
-            Log.i(TAG, "Search images with request '${request}'")
+            Log.i(TAG, request.toString())
 
-            var imageDatas = arrayListOf<ImageData>()
+            var imageDatas: ArrayList<ImageData>? = null
             when (result) {
                 is Result.Failure -> {
                     Log.w(TAG, "Failed to search images: ${result.getException()}")
@@ -34,7 +34,11 @@ class PixabayApi {
                     val dataJson = Json.parseToJsonElement(data)
                     dataJson.jsonObject["hits"]?.jsonArray?.forEach {
                         val data = ignoreUnknownJson.decodeFromJsonElement<ImageData>(it)
-                        imageDatas.add(data)
+                        if (imageDatas == null) {
+                            imageDatas = arrayListOf()
+                        }
+
+                        imageDatas!!.add(data)
                     }
                 }
             }

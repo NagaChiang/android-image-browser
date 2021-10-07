@@ -9,6 +9,7 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.SearchView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -65,6 +66,8 @@ class MainActivity : AppCompatActivity() {
             imageDatas.clear()
             imageDatas.addAll(newDatas)
             imageRecyclerView.adapter?.notifyDataSetChanged()
+        } else {
+            Toast.makeText(this, "Failed to search images", Toast.LENGTH_LONG).show()
         }
 
         progressOverlay.visibility = GONE
