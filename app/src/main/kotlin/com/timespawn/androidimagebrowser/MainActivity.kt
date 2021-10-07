@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.provider.SearchRecentSuggestions
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -25,6 +26,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.timespawn.androidimagebrowser.models.ImageData
 import com.timespawn.androidimagebrowser.models.PixabayApi
 import com.timespawn.androidimagebrowser.models.RemoteConfig
+import com.timespawn.androidimagebrowser.providers.ImageSearchSuggestionProvider
 import com.timespawn.androidimagebrowser.views.ImageRecyclerViewGridAdapter
 import com.timespawn.androidimagebrowser.views.ImageRecyclerViewLinearAdapter
 import kotlinx.coroutines.launch
@@ -92,11 +94,16 @@ class MainActivity : AppCompatActivity() {
         super.onNewIntent(intent)
 
         if (intent?.action == Intent.ACTION_SEARCH) {
-            intent.getStringExtra(SearchManager.QUERY)?.also { query -> lifecycleScope.launch {
-                setProgressOverlayEnabled(true)
-                onSearchQueryReceived(query)
-                setProgressOverlayEnabled(false)
-            }}
+            intent.getStringExtra(SearchManager.QUERY)?.also {
+                SearchRecentSuggestions(this, ImageSearchSuggestionProvider.AUTHORITY, ImageSearchSuggestionProvider.MODE)
+                    .saveRecentQuery(it, null)
+
+                lifecycleScope.launch {
+                    setProgressOverlayEnabled(true)
+                    onSearchQueryReceived(it)
+                    setProgressOverlayEnabled(false)
+                }
+            }
         }
     }
 
