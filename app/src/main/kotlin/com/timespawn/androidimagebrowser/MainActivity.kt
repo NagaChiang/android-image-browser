@@ -8,10 +8,12 @@ import android.os.Bundle
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import android.widget.LinearLayout.VERTICAL
 import android.widget.SearchView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.timespawn.androidimagebrowser.models.ImageData
@@ -37,6 +39,7 @@ class MainActivity : AppCompatActivity() {
         imageRecyclerView = findViewById<RecyclerView>(R.id.imageRecyclerView).apply {
             adapter = ImageRecyclerViewAdapter(imageDatas)
             layoutManager = LinearLayoutManager(this@MainActivity)
+            addItemDecoration(DividerItemDecoration(this@MainActivity, VERTICAL))
         }
 
         progressOverlay = findViewById(R.id.progressOverlay)
