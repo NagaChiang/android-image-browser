@@ -10,8 +10,8 @@ import coil.load
 import com.timespawn.androidimagebrowser.R
 import com.timespawn.androidimagebrowser.models.ImageData
 
-class ImageRecyclerViewAdapter(private val imageDatas: ArrayList<ImageData>) :
-    RecyclerView.Adapter<ImageRecyclerViewAdapter.ViewHolder>() {
+class ImageRecyclerViewLinearAdapter(private val imageDatas: ArrayList<ImageData>) :
+    RecyclerView.Adapter<ImageRecyclerViewLinearAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val previewImage: ImageView = view.findViewById(R.id.previewImage)
@@ -23,13 +23,11 @@ class ImageRecyclerViewAdapter(private val imageDatas: ArrayList<ImageData>) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.image_list_item, parent, false)
-
         return ViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val data = imageDatas[position]
-
         holder.previewImage.load(data.previewUrl) {
             crossfade(true)
         }

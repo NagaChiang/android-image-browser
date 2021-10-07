@@ -15,7 +15,8 @@
         app:layout_constraintEnd_toStartOf="@+id/tableLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="ImageContrastCheck" />
+        tools:ignore="ImageContrastCheck"
+        tools:srcCompat="@tools:sample/avatars" />
 
     <TableLayout
         android:id="@+id/tableLayout"

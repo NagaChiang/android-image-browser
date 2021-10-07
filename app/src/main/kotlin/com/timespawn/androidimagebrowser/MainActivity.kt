@@ -12,6 +12,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import android.widget.LinearLayout.HORIZONTAL
 import android.widget.LinearLayout.VERTICAL
 import android.widget.SearchView
 import android.widget.Toast
@@ -19,11 +20,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.timespawn.androidimagebrowser.models.ImageData
 import com.timespawn.androidimagebrowser.models.PixabayApi
-import com.timespawn.androidimagebrowser.views.ImageRecyclerViewAdapter
+import com.timespawn.androidimagebrowser.views.ImageRecyclerViewGridAdapter
+import com.timespawn.androidimagebrowser.views.ImageRecyclerViewLinearAdapter
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -35,14 +38,17 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "MainActivity"
         private const val LAYOUT_MODE_PREF_KEY = "layoutMode"
+        private const val ITEM_PER_ROW = 3
     }
+
+    private val imageDatas = arrayListOf<ImageData>()
+    private val linearAdapter = ImageRecyclerViewLinearAdapter(imageDatas)
+    private val gridAdapter = ImageRecyclerViewGridAdapter(imageDatas)
 
     private lateinit var imageRecyclerView : RecyclerView
     private lateinit var progressOverlay : View
     private lateinit var defaultLayoutMode: LayoutMode
     private lateinit var currentLayoutMode: LayoutMode
-
-    private var imageDatas = arrayListOf<ImageData>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,11 +58,8 @@ class MainActivity : AppCompatActivity() {
         defaultLayoutMode = LayoutMode.List // TODO: Remote default value
         currentLayoutMode = getLayoutModeFromPreferences()
 
-        imageRecyclerView = findViewById<RecyclerView>(R.id.imageRecyclerView).apply {
-            adapter = ImageRecyclerViewAdapter(imageDatas)
-            layoutManager = LinearLayoutManager(this@MainActivity)
-            addItemDecoration(DividerItemDecoration(this@MainActivity, VERTICAL))
-        }
+        imageRecyclerView = findViewById(R.id.imageRecyclerView)
+        updateImageRecyclerViewLayout(currentLayoutMode)
 
         progressOverlay = findViewById(R.id.progressOverlay)
 
@@ -107,6 +110,7 @@ class MainActivity : AppCompatActivity() {
                 currentLayoutMode = if (currentLayoutMode == LayoutMode.List) LayoutMode.Grid else LayoutMode.List
                 setLayoutModeToPreferences(currentLayoutMode)
                 item.icon = getLayoutModeIcon(currentLayoutMode)
+                updateImageRecyclerViewLayout(currentLayoutMode)
             }
         }
 
@@ -145,5 +149,21 @@ class MainActivity : AppCompatActivity() {
         Log.w(TAG, "intToLayoutMode(): Failed to convert int to LayoutMode ($value), returns default layout mode instead")
 
         return defaultLayoutMode
+    }
+
+    private fun updateImageRecyclerViewLayout(mode: LayoutMode) {
+        when (mode) {
+            LayoutMode.List -> {
+                imageRecyclerView.addItemDecoration(DividerItemDecoration(this, VERTICAL))
+                imageRecyclerView.adapter = linearAdapter
+                imageRecyclerView.layoutManager = LinearLayoutManager(this)
+            }
+
+            LayoutMode.Grid -> {
+                imageRecyclerView.removeItemDecoration(DividerItemDecoration(this, VERTICAL))
+                imageRecyclerView.adapter = gridAdapter
+                imageRecyclerView.layoutManager = GridLayoutManager(this, ITEM_PER_ROW)
+            }
+        }
     }
 }
