@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.timespawn.androidimagebrowser.models.ImageData
+import com.timespawn.androidimagebrowser.models.ImageSearchApi
 import com.timespawn.androidimagebrowser.models.PixabayApi
 import com.timespawn.androidimagebrowser.models.RemoteConfig
 import com.timespawn.androidimagebrowser.providers.ImageSearchSuggestionProvider
@@ -46,6 +47,7 @@ class MainActivity : AppCompatActivity() {
     private val imageDatas = arrayListOf<ImageData>()
     private val linearAdapter = ImageRecyclerViewLinearAdapter(imageDatas)
     private val gridAdapter = ImageRecyclerViewGridAdapter(imageDatas)
+    private val imageSearchApi: ImageSearchApi = PixabayApi()
 
     private lateinit var imageRecyclerView: RecyclerView
     private lateinit var progressOverlay: View
@@ -109,7 +111,7 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("NotifyDataSetChanged")
     private suspend fun onSearchQueryReceived(query: String) {
-        val newDatas = PixabayApi.searchImages(query)
+        val newDatas = imageSearchApi.searchImages(query)
         if (newDatas != null) {
             imageDatas.clear()
             imageDatas.addAll(newDatas)

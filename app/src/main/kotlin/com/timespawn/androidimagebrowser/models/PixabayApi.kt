@@ -10,44 +10,44 @@ import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 
-class PixabayApi {
+class PixabayApi : ImageSearchApi {
     companion object {
         private const val TAG = "PixabayApi"
         private const val BASE_PATH = "https://pixabay.com/api/"
         private val ignoreUnknownJson = Json { ignoreUnknownKeys = true }
+    }
 
-        suspend fun searchImages(query: String): ArrayList<ImageData>? {
-            val (request, _, result) = Fuel.get(BASE_PATH, listOf(
-                "key" to BuildConfig.PIXABAY_API_KEY,
-                "q" to query,
-            )).awaitStringResponseResult()
+    override suspend fun searchImages(query: String): ArrayList<ImageData>? {
+        val (request, _, result) = Fuel.get(BASE_PATH, listOf(
+            "key" to BuildConfig.PIXABAY_API_KEY,
+            "q" to query,
+        )).awaitStringResponseResult()
 
-            Log.i(TAG, request.toString())
+        Log.i(TAG, request.toString())
 
-            var imageDatas: ArrayList<ImageData>? = null
-            when (result) {
-                is Result.Failure -> {
-                    Log.w(TAG, "Failed to search images: ${result.getException()}")
-                }
-
-                is Result.Success -> {
-                    val data = result.get()
-
-                    Log.i(TAG, "Search image result: $data")
-
-                    if (imageDatas == null) {
-                        imageDatas = arrayListOf()
-                    }
-
-                    val dataJson = Json.parseToJsonElement(data)
-                    dataJson.jsonObject["hits"]?.jsonArray?.forEach {
-                        val imageData = ignoreUnknownJson.decodeFromJsonElement<ImageData>(it)
-                        imageDatas.add(imageData)
-                    }
-                }
+        var imageDatas: ArrayList<ImageData>? = null
+        when (result) {
+            is Result.Failure -> {
+                Log.w(TAG, "Failed to search images: ${result.getException()}")
             }
 
-            return imageDatas
+            is Result.Success -> {
+                val data = result.get()
+
+                Log.i(TAG, "Search image result: $data")
+
+                if (imageDatas == null) {
+                    imageDatas = arrayListOf()
+                }
+
+                val dataJson = Json.parseToJsonElement(data)
+                dataJson.jsonObject["hits"]?.jsonArray?.forEach {
+                    val imageData = ignoreUnknownJson.decodeFromJsonElement<ImageData>(it)
+                    imageDatas.add(imageData)
+                }
+            }
         }
+
+        return imageDatas
     }
 }
