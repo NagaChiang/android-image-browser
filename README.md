@@ -1,6 +1,8 @@
 # Android Image Browser
 
-Android image browser for [Pixabay](https://pixabay.com/) made with Android SDK. 
+Android image browser for [Pixabay](https://pixabay.com/) made with Android SDK.
+
+![](./browser_01.gif)
 
 ## Features
 
@@ -8,13 +10,17 @@ Android image browser for [Pixabay](https://pixabay.com/) made with Android SDK.
 
 Provides list or grid layout modes.
 
-### Remote Configuration
-
-Some configurations can be controlled remotely. Currently it's hosted on the GitHub pages of this repository.
+![](./browser_02.gif)
 
 ### Recent Search Suggestion
 
 Suggests keywords depending on recent search history.
+
+![](./browser_03.gif)
+
+### Remote Configuration
+
+Some configurations can be controlled remotely. Currently it's hosted on the GitHub pages of this repository.
 
 ## Build
 
