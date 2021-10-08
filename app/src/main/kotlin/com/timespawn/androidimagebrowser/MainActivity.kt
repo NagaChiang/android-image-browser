@@ -177,6 +177,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateImageRecyclerViewLayout(mode: LayoutMode) {
+        while (imageRecyclerView.itemDecorationCount > 0) {
+            imageRecyclerView.removeItemDecorationAt(0)
+        }
+
         when (mode) {
             LayoutMode.List -> {
                 imageRecyclerView.addItemDecoration(DividerItemDecoration(this, VERTICAL))
@@ -185,7 +189,6 @@ class MainActivity : AppCompatActivity() {
             }
 
             LayoutMode.Grid -> {
-                imageRecyclerView.removeItemDecoration(DividerItemDecoration(this, VERTICAL))
                 imageRecyclerView.adapter = gridAdapter
                 imageRecyclerView.layoutManager = GridLayoutManager(this, ITEM_PER_ROW)
             }
